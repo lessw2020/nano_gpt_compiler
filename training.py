@@ -40,13 +40,40 @@ colorama.init(autoreset=True)  # reset after every line
 # --- globals
 _valid_models = ["dev", "mini"]
 
+import logging
 
-def training_main():
-    print(f"Welcome! ")
+logger: logging.Logger = logging.getLogger(__name__)
+logging.setLevel = logging.INFO
+
+
+def _log(msg):
+    if dist.is_initialized():
+        if dist.get_rank() == 0:
+            logger.warning(f"{msg}")
+
+
+def get_environment():
+    rank = int(os.environ["LOCAL_RANK"])
+    global_rank = int(os.environ["RANK"])
+    world_size = int(os.environ["WORLD_SIZE"])
+
+    return (rank, global_rank, world_size)
+
+
+def training_main(model_name):
     train_cfg = config.train_config()  # loads from defaults
 
     # seed
     setup_core.seed_init(train_cfg.seed)
+
+    local_rank, global_rank, world_size = get_environment()
+
+    setup_core.start_backend()
+    setup_core.set_device(local_rank)
+    _log(f"Running model: {model_name}")
+    _log(f"World Environment:\n{world_size=}\n")
+
+    setup_core.cleanup(logger, local_rank)
 
 
 def parse_args():
@@ -67,7 +94,6 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     curr_model = args.model
-    print(f"===> Loading Model: {args.model=}")
     assert (
         curr_model in _valid_models
     ), f"Model {curr_model} is not supported. Check valid list in {__name__}. Aborting..."
@@ -75,4 +101,4 @@ if __name__ == "__main__":
     if curr_model in ["dev", "mini"]:
         import config.shakespeare_config as config
 
-    training_main()
+    training_main(curr_model)
