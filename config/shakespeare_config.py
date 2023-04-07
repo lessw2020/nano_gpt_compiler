@@ -46,3 +46,5 @@ class train_config:
     warmup_iters = 2  # not super necessary potentially
     save_optimizer: bool = False
     load_optimizer: bool = False
+
+    dynamo_compile: bool = True
