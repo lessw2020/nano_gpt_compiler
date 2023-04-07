@@ -32,6 +32,8 @@ import torch.distributed as dist
 
 from torch.utils.data import DistributedSampler
 
+from setup import setup_core
+
 # prep -------
 colorama.init(autoreset=True)  # reset after every line
 
@@ -41,6 +43,10 @@ _valid_models = ["dev", "mini"]
 
 def training_main():
     print(f"Welcome! ")
+    train_cfg = config.train_config()  # loads from defaults
+
+    # seed
+    setup_core.seed_init(train_cfg.seed)
 
 
 def parse_args():

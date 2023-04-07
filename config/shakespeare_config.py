@@ -14,6 +14,8 @@ from torch.utils.data.distributed import DistributedSampler
 
 @dataclass
 class train_config:
+    seed: int = 2023
+
     out_dir = "out-shakespeare-char"
     eval_interval = 250  # keep frequent because we'll overfit
     eval_iters = 200
